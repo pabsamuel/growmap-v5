@@ -1,5 +1,5 @@
 // GrowMap v0.5 Service Worker
-const CACHE_NAME = 'growmap-v5-cache-v1';
+const CACHE_NAME = 'growmap-v5-cache-v2';
 const STATIC_ASSETS = [
   './',
   './index.html',

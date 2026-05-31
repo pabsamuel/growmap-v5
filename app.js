@@ -119,10 +119,10 @@ const App = {
         this.map.flyTo([lat, lng], Math.max(this.map.getZoom(), 8), { duration: 1.2 });
         document.getElementById('map-overlay').classList.add('hidden');
         const panel = document.getElementById('results-panel');
-        panel.classList.remove('panel-hidden', 'sheet-peek', 'sheet-full');
+        panel.classList.remove('panel-hidden', 'sheet-peek', 'sheet-half');
         panel.classList.add('panel-visible');
         if (this.isMobile) {
-            panel.classList.add('sheet-half');
+            panel.classList.add('sheet-full');
         }
         document.getElementById('location-name').textContent = name;
         document.getElementById('location-coords').textContent = `${lat.toFixed(4)}°, ${lng.toFixed(4)}°`;
@@ -213,6 +213,16 @@ const App = {
                 document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
             }
         });
+        // Collapsible climate card on mobile
+        if (this.isMobile) {
+            const climateHeader = document.querySelector('.climate-header');
+            const climateCard = document.getElementById('climate-card');
+            if (climateHeader && climateCard) {
+                climateHeader.addEventListener('click', () => {
+                    climateCard.classList.toggle('collapsed');
+                });
+            }
+        }
     },
 
     renderFavoritesBtn() {
