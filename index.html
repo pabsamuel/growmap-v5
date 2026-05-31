@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>GrowMap v5 — Plant Explorer</title>
+    <meta name="description" content="Discover which plants can grow anywhere on Earth!">
+    <!-- PWA Manifest & Meta -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#13151a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GrowMap">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header id="app-header">
+        <div class="header-left">
+            <div class="logo">
+                <span class="logo-icon">🌱</span>
+                <span class="logo-text">GrowMap</span>
+            </div>
+        </div>
+        <div class="header-center">
+            <div class="location-search-wrapper" id="location-search-wrapper">
+                <div class="location-search-box">
+                    <span class="loc-search-icon">📍</span>
+                    <input type="text" id="location-search" placeholder="Search any place..." autocomplete="off"
+                        spellcheck="false">
+                    <span class="loc-search-clear hidden" id="loc-search-clear">✕</span>
+                </div>
+                <div class="loc-suggestions hidden" id="loc-suggestions"></div>
+            </div>
+        </div>
+        <div class="header-right">
+            <button id="btn-favorites" class="header-btn" title="Favorites">❤️</button>
+            <button id="btn-compare" class="header-btn" title="Compare">⚖️</button>
+            <button id="btn-api" class="header-btn btn-api" title="API Configuration">🔌</button>
+            <div class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode">
+                <span>☀️</span>
+                <div class="theme-toggle-track">
+                    <div class="theme-toggle-thumb"></div>
+                </div>
+                <span>🌙</span>
+            </div>
+            <button id="btn-about" class="header-btn" title="About">ℹ️</button>
+        </div>
+    </header>
+
+    <!-- Mobile Search Bar (visible only on mobile) -->
+    <div id="mobile-search-bar" class="mobile-search-bar">
+        <div class="mobile-search-box">
+            <span class="loc-search-icon">📍</span>
+            <input type="text" id="mobile-location-search" placeholder="Search a place..." autocomplete="off"
+                spellcheck="false">
+            <span class="mobile-search-clear hidden" id="mobile-search-clear">✕</span>
+        </div>
+        <div class="mobile-suggestions hidden" id="mobile-suggestions"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main id="app-main">
+        <!-- Map Container -->
+        <div id="map-container">
+            <div id="map"></div>
+            <div id="map-overlay" class="map-overlay">
+                <div class="overlay-content">
+                    <span class="overlay-icon">📍</span>
+                    <p>Tap anywhere on the map<br>or search a location</p>
+                </div>
+            </div>
+            <!-- Floating buttons on map -->
+            <button id="btn-my-location" class="map-fab" title="Use my location">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="4"/>
+                    <path d="M12 2v2M12 20v2M2 12h2M20 12h2"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Results Panel (desktop: side panel, mobile: bottom sheet) -->
+        <aside id="results-panel" class="panel-hidden">
+            <!-- Drag handle for mobile bottom sheet -->
+            <div class="sheet-handle" id="sheet-handle">
+                <div class="sheet-handle-bar"></div>
+            </div>
+
+            <!-- Location Climate Card -->
+            <div id="climate-card" class="climate-card">
+                <div class="climate-header">
+                    <span class="climate-pin">📍</span>
+                    <div>
+                        <h2 id="location-name">Select a location</h2>
+                        <p id="location-coords" class="climate-coords"></p>
+                    </div>
+                </div>
+                <div id="climate-stats" class="climate-stats">
+                    <div class="stat">
+                        <span class="stat-icon">🌡️</span>
+                        <span class="stat-label">Avg Temp</span>
+                        <span id="stat-temp" class="stat-value">—</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icon">🌧️</span>
+                        <span class="stat-label">Rainfall</span>
+                        <span id="stat-rain" class="stat-value">—</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icon">☀️</span>
+                        <span class="stat-label">Sun Hours</span>
+                        <span id="stat-sun" class="stat-value">—</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icon">💧</span>
+                        <span class="stat-label">Humidity</span>
+                        <span id="stat-humidity" class="stat-value">—</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icon">🧪</span>
+                        <span class="stat-label">Soil pH</span>
+                        <span id="stat-ph" class="stat-value">—</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icon">❄️</span>
+                        <span class="stat-label">Zone</span>
+                        <span id="stat-zone" class="stat-value">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search & Filter -->
+            <div class="search-filter">
+                <div class="search-row">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="plant-search" placeholder="Search plants...">
+                    </div>
+                    <select id="sort-select" class="sort-select">
+                        <option value="score-desc">Best match ↓</option>
+                        <option value="score-asc">Score ↑</option>
+                        <option value="name-asc">Name A-Z</option>
+                        <option value="name-desc">Name Z-A</option>
+                    </select>
+                </div>
+                <div id="category-filters" class="category-filters"></div>
+            </div>
+
+            <!-- Results Count -->
+            <div class="results-header">
+                <span id="results-count" class="results-count">0 plants</span>
+            </div>
+
+            <!-- Plants List -->
+            <div id="plants-list" class="plants-list">
+                <div class="empty-state"><span>🌍</span><p>Tap on the map to see plant growability scores</p></div>
+            </div>
+
+            <!-- DB Stats Footer -->
+            <div id="db-stats" class="db-stats"></div>
+        </aside>
+    </main>
+
+    <!-- Mobile Bottom Nav -->
+    <nav id="mobile-nav" class="mobile-nav">
+        <button class="nav-tab active" data-view="map">
+            <span class="nav-icon">🗺️</span>
+            <span class="nav-label">Map</span>
+        </button>
+        <button class="nav-tab" data-view="plants">
+            <span class="nav-icon">🌱</span>
+            <span class="nav-label">Plants</span>
+        </button>
+        <button class="nav-tab" data-view="favorites">
+            <span class="nav-icon">❤️</span>
+            <span class="nav-label">Favorites</span>
+        </button>
+        <button class="nav-tab" data-view="settings">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">Settings</span>
+        </button>
+    </nav>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p id="loading-text">Loading...</p>
+        </div>
+    </div>
+
+    <!-- Plant Detail Modal -->
+    <div id="plant-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-container">
+            <button class="modal-close">✕</button>
+            <div id="modal-body" class="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Compare Modal -->
+    <div id="compare-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-container modal-wide">
+            <button class="modal-close">✕</button>
+            <div id="compare-modal-body" class="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div id="about-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-container modal-sm">
+            <button class="modal-close">✕</button>
+            <div class="modal-body">
+                <h2>🌱 GrowMap v5</h2>
+                <p>Discover which plants can grow anywhere on Earth based on real climate data.</p>
+                <p><strong>Features:</strong></p>
+                <ul>
+                    <li>10,000+ plants with growability scoring</li>
+                    <li>Real climate data from Open-Meteo</li>
+                    <li>Soil data from ISRIC SoilGrids</li>
+                    <li>Compare plants side by side</li>
+                    <li>Favorites & offline support</li>
+                </ul>
+                <p style="margin-top:16px;font-size:12px;color:var(--text-muted)">Built with ❤️ for plant lovers</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Config Modal -->
+    <div id="api-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-container modal-api">
+            <button class="modal-close">✕</button>
+            <div id="api-modal-body" class="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="data/environment.js"></script>
+    <script src="data/plants-core.js"></script>
+    <script src="data/plant-merger.js"></script>
+    <script src="api/perenual.js"></script>
+    <script src="api/trefle.js"></script>
+    <script src="scoring.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW registered:', reg.scope))
+                    .catch(err => console.warn('SW registration failed:', err));
+            });
+        }
+    </script>
+</body>
+
+</html>
