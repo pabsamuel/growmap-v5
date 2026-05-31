@@ -30,7 +30,6 @@ const App = {
         this.renderCompareBtn();
         if (this.isMobile) {
             this.initMobileSearch();
-            this.initMobileNav();
             this.initBottomSheet();
             this.initGeolocation();
         } else {
@@ -945,57 +944,6 @@ const App = {
     },
 
     // ==================== MOBILE: BOTTOM NAV ====================
-    initMobileNav() {
-        const nav = document.getElementById('mobile-nav');
-        if (!nav) return;
-        const tabs = nav.querySelectorAll('.nav-tab');
-        const panel = document.getElementById('results-panel');
-        const mapContainer = document.getElementById('map-container');
-
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const view = tab.dataset.view;
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-
-                switch (view) {
-                    case 'map':
-                        // Show map, hide panel
-                        mapContainer.style.display = '';
-                        if (panel) {
-                            panel.classList.remove('sheet-peek', 'sheet-half', 'sheet-full');
-                            panel.classList.add('panel-hidden');
-                            panel.classList.remove('panel-visible');
-                        }
-                        this.map.invalidateSize();
-                        break;
-                    case 'plants':
-                        // Show panel in full mode
-                        mapContainer.style.display = '';
-                        if (panel && this.databaseReady) {
-                            panel.classList.remove('panel-hidden', 'sheet-peek', 'sheet-half');
-                            panel.classList.add('panel-visible', 'sheet-full');
-                        }
-                        break;
-                    case 'favorites':
-                        // Show favorites filter
-                        if (panel && this.databaseReady) {
-                            panel.classList.remove('panel-hidden', 'sheet-peek', 'sheet-half');
-                            panel.classList.add('panel-visible', 'sheet-full');
-                        }
-                        // Trigger favorites filter
-                        const favBtn = document.getElementById('btn-favorites');
-                        if (favBtn) favBtn.click();
-                        break;
-                    case 'settings':
-                        // Show API config
-                        this.showApiConfig();
-                        break;
-                }
-            });
-        });
-    },
-
     // ==================== MOBILE: BOTTOM SHEET ====================
     initBottomSheet() {
         const handle = document.getElementById('sheet-handle');
