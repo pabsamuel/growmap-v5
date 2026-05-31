@@ -1412,6 +1412,8 @@ body {
     transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 800;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
   #results-panel.panel-hidden {
@@ -1453,7 +1455,7 @@ body {
   }
 
   /* Climate card compact */
-  .climate-card { padding: 12px 14px; }
+  .climate-card { padding: 12px 14px; flex-shrink: 0; }
   .climate-header h2 { font-size: 15px; }
   .climate-stats { grid-template-columns: repeat(3, 1fr); gap: 6px; }
   .stat { padding: 6px 3px; }
@@ -1462,10 +1464,12 @@ body {
   .stat-value { font-size: 12px; }
 
   /* Search & filter compact */
-  .search-filter { padding: 8px 12px; }
+  .search-filter { padding: 8px 12px; flex-shrink: 0; }
   .search-row { gap: 6px; }
   .category-filters { padding: 6px 0; }
   .cat-btn { padding: 6px 10px; font-size: 12px; }
+  .results-header { flex-shrink: 0; padding: 4px 14px; }
+  .sheet-handle { flex-shrink: 0; }
 
   /* Plant cards: touch-friendly */
   .plant-card { padding: 14px; margin: 0 10px 10px; }
@@ -1479,7 +1483,13 @@ body {
   .compare-label { min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
 
   /* Plants list scroll */
-  .plants-list { padding: 8px 0; }
+  .plants-list {
+    padding: 8px 0;
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    min-height: 0;
+  }
 
   /* Mobile bottom nav */
   .mobile-nav {
